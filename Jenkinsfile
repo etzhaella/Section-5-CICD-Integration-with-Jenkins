@@ -52,6 +52,15 @@ pipeline {
             }
         }
 
+        stage('Stop Jenkins Container') {
+            steps {
+                sh '''
+                    docker stop jenkins
+                    docker rm jenkins
+                '''
+            }
+        }
+
         stage('Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(
