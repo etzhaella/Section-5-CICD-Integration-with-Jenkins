@@ -2,19 +2,17 @@ pipeline {
     agent any
 
     environment {
-        // GitHub repo URL and branch
-        GIT_REPO_URL = 'https://github.com/etzhaella/Section-5-CICD-Integration-with-Jenkins.git'
-        GIT_BRANCH   = 'main'
-
-        // Docker Hub image (must be lowercase)
-        IMAGE_NAME   = 'etzhaella/section5-flask-aws-monitor'
+        DOCKERHUB_USERNAME = credentials('dockerhub-username')
+        DOCKERHUB_PASSWORD = credentials('dockerhub-password')
+        IMAGE_NAME = "your-dockerhub-username/flask-aws-monitor"   // ← להחליף לשם המשתמש שלך
+        IMAGE_TAG = "latest"
     }
 
     stages {
 
         stage('Clone Repository') {
             steps {
-                git branch: "${GIT_BRANCH}", url: "${GIT_REPO_URL}"
+                git branch: 'main', url: 'https://github.com/your-repo.git'  // ← להחליף ל־repo שלך
             }
         }
 
@@ -23,73 +21,56 @@ pipeline {
 
                 stage('Linting') {
                     steps {
+                        echo "Running linting checks..."
                         sh '''
-                            echo "Running Python linting with flake8 (mock)"
-                            echo "Running Shell linting with shellcheck (mock)"
-                            echo "Running Dockerfile linting with hadolint (mock)"
+                            echo "Mock: Running Flake8..."
+                            echo "Mock: Running ShellCheck..."
+                            echo "Mock: Running Hadolint..."
                         '''
                     }
                 }
 
                 stage('Security Scan') {
                     steps {
+                        echo "Running security scans..."
                         sh '''
-                            echo "Running Bandit security scan for Python (mock)"
-                            echo "Running Trivy security scan for Docker image (mock)"
+                            echo "Mock: Running Bandit..."
+                            echo "Mock: Running Trivy..."
                         '''
                     }
                 }
+
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    echo "Building Docker image from app/Dockerfile"
-                    docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ./app
-                    docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest
-                '''
-            }
-        }
-
-        stage('Stop Jenkins Container') {
-            steps {
-                sh '''
-                    docker stop jenkins
-                    docker rm jenkins
+                    echo "Building Docker image..."
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
                 '''
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKERHUB_USERNAME',
-                    passwordVariable: 'DOCKERHUB_PASSWORD'
-                )]) {
-                    sh '''
-                        echo "Login to Docker Hub"
-                        echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+                sh '''
+                    echo "Logging in to Docker Hub..."
+                    echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
 
-                        echo "Pushing Docker image to Docker Hub"
-                        docker push ${IMAGE_NAME}:${BUILD_NUMBER}
-                        docker push ${IMAGE_NAME}:latest
-
-                        echo "Logout from Docker Hub"
-                        docker logout
-                    '''
-                }
+                    echo "Pushing Docker image..."
+                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo "Pipeline completed successfully!"
         }
         failure {
-            echo 'Pipeline failed! Check logs for details.'
+            echo "Pipeline failed! Check logs for details."
         }
     }
 }
