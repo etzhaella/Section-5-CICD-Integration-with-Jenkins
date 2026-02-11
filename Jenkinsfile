@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_USERNAME = credentials('dockerhub-username')
         DOCKERHUB_PASSWORD = credentials('dockerhub-password')
-        IMAGE_NAME = "your-dockerhub-username/flask-aws-monitor"   // ← להחליף לשם המשתמש שלך
+        IMAGE_NAME = "etzhaella/flask-aws-monitor"
         IMAGE_TAG = "latest"
     }
 
@@ -12,7 +12,7 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-repo.git'  // ← להחליף ל־repo שלך
+                git branch: 'main', url: 'https://github.com/etzhaella/Section-5-CICD-Integration-with-Jenkins.git'
             }
         }
 
