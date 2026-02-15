@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        any {
-            image 'python:3.12-slim'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     environment {
         DOCKERHUB_USERNAME = credentials('dockerhub-username')
@@ -26,9 +21,8 @@ pipeline {
 
                 stage('Linting') {
                     steps {
-                        echo "Running linting checks..."
+                        echo "Running linting checks (mock)..."
                         sh '''
-                            python --version
                             echo "Mock: Running Flake8..."
                             echo "Mock: Running ShellCheck..."
                             echo "Mock: Running Hadolint..."
@@ -38,7 +32,7 @@ pipeline {
 
                 stage('Security Scan') {
                     steps {
-                        echo "Running security scans..."
+                        echo "Running security scans (mock)..."
                         sh '''
                             echo "Mock: Running Bandit..."
                             echo "Mock: Running Trivy..."
